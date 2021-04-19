@@ -1,0 +1,70 @@
+```{r}
+library(ggplot2)
+library(mlr)
+
+train <- read.csv("Treasury Recovery Act Data as of 9-30-2010.csv")
+train
+```
+
+```{r}
+columns<-colnames(train)
+columns
+```
+```{r}
+toNumeric<-function(str){
+  return (strtoi(gsub(",","",substr(str,2, nchar(str)))))}
+
+for(x in 2:22){
+  train[x] <- lapply(train[x], toNumeric)
+}
+
+print(train)
+```
+
+
+```{r}
+print(summarizeColumns(train))
+
+```
+
+```{r}
+ggplot(data = train, aes(x = ï..States, y = Recovery.Zone.Economic.Development.Bond.Allocation)) + geom_point()+ theme(axis.text.x = element_text(hjust = 1, vjust=0.5, angle = 90))
+```
+```{r}
+ggplot(data = train, aes(x = ï..States, y = Recovery.Zone.Facility.Bond.Allocation)) + geom_point()+ theme(axis.text.x = element_text(hjust = 1, vjust=0.5, angle = 90))
+```
+
+```{r}
+ggplot(data = train, aes(x = ï..States, y = X2009.Qualified.School.Construction.Bond.Allocation)) + geom_point()+ theme(axis.text.x = element_text(hjust = 1, vjust=0.5, angle = 90))
+```
+```{r}
+ggplot(data = train, aes(x = ï..States, y = X2010.Qualified.School.Construction.Bond.Allocation)) + geom_point()+ theme(axis.text.x = element_text(hjust = 1, vjust=0.5, angle = 90))
+```
+```{r}
+ggplot(data = train, aes(x = ï..States, y = Qualified.Energy.Conservation.Bond.Allocation)) + geom_point()+ theme(axis.text.x = element_text(hjust = 1, vjust=0.5, angle = 90))
+```
+```{r}
+ggplot(data = train, aes(x = ï..States, y = X2009.Qualified.Zone.Academy.Bond.Allocation)) + geom_point()+ theme(axis.text.x = element_text(hjust = 1, vjust=0.5, angle = 90))
+```
+```{r}
+ggplot(data = train, aes(x = ï..States, y = X2010.Qualified.Zone.Academy.Bond.Allocation)) + geom_point()+ theme(axis.text.x = element_text(hjust = 1, vjust=0.5, angle = 90))
+```
+```{r}
+ggplot(data = train, aes(x = ï..States, y = Tribal.Economic.Development.Bond.Allocation)) + geom_point()+ theme(axis.text.x = element_text(hjust = 1, vjust=0.5, angle = 90))
+```
+```{r}
+ggplot(data = train, aes(x = ï..States, y = First.Time.Homebuyer.Credit.for.Houses.Purchased.in..2009...Number.of.Filers)) + geom_point()+ theme(axis.text.x = element_text(hjust = 1, vjust=0.5, angle = 90))
+```
+```{r}
+ggplot(data = train, aes(x = ï..States, y = First.Time.Homebuyer.Credit.for.Houses.Purchased.in.2009...Sum.of.Credits.Claimed)) + geom_point()+ theme(axis.text.x = element_text(hjust = 1, vjust=0.5, angle = 90))
+```
+```{r}
+ggplot(data = train, aes(x = ï..States, y = Cash.Assistance.to.States.in.Lieu.of.Low.Income.Housing.Tax.Credit...Awards)) + geom_point()+ theme(axis.text.x = element_text(hjust = 1, vjust=0.5, angle = 90))
+```
+```{r}
+ggplot(data = train, aes(x = ï..States, y = train$Cash.Assistance.to.States.in.Lieu.of.Low.Income.Housing.Tax.Credit...Outlays)) + geom_point()+ theme(axis.text.x = element_text(hjust = 1, vjust=0.5, angle = 90))
+```
+```{r}
+ggplot(data = train, aes(x = ï..States, y = train$Cash.Assistance.for.Specified.Energy.Property.in.Lieu.of.Tax.Credit....Number.of.Awards)) + geom_point()+ theme(axis.text.x = element_text(hjust = 1, vjust=0.5, angle = 90))
+```
+
