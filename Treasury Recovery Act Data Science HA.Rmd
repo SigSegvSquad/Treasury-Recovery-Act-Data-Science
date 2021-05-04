@@ -1,4 +1,4 @@
-```{r}
+```{r Import Libraries and Data}
 library(ggplot2)
 library(mlr)
 
@@ -6,14 +6,45 @@ train <- read.csv("Treasury Recovery Act Data as of 9-30-2010.csv")
 train
 ```
 
-```{r}
+```{r Data Inspection}
 columns<-colnames(train)
 columns
 ```
 
-```{r}
-# data cleaning
+```{r Column Metadata}
+cat("Treasury Recovery Act Dataset for 2008\n")
 
+cat("\nThis Dataset represents funds allocated by the United States Federal Governemnt in response to the Global Financial Crisis of 2008. Every Column represents funding given under a particular act or bond while every row represents funding given to a particular state. The last row also shows us the total funding given to all states in a particular Bond/Act.\n\n")
+
+cat("\nThe details for each column are as below:\n")
+
+cat("\n1. Recovery.Zone.Economic.Development.Bond.Allocation represents the funding given for econmic recovery through a refundable tax credit allowed under section 6431 of the Code equal to 45% of the interest payable by the issuer to investors.\n")
+
+cat("\n2. The American Recovery and Reinvestment Tax Act of 2009 (the “Recovery Act”) created a new category of tax-exempt bonds called Recovery Zone Facility Bonds (“RZFBs”) to assist economic development in distressed areas throughout the United States.\n")
+
+cat("\n3. Qualified school construction bonds allow schools to borrow at a nominal zero percent rate for the rehabilitation, repair and equipping of schools. In addition, QSCB funds can be used to purchase land on which a public school will be built. \n")
+
+cat("\n4. Qualified Energy Conservation Bonds (QECBs) are federally subsidized bonds available to qualified states, local, and tribal issuers. A QECB is not a grant, but is among the lowest-cost public financing available for eligible energy efficiency, renewable energy, and mass commuting projects.\n")
+
+cat("\n5. Qualified zone academic bonds allow certain qualified schools to borrow at nominal interest rates (as low as zero percent) for costs incurred in connection with the establishment of special programs in partnership with the private sector.\n")
+
+cat("\n6. Tribal Economic Development Bonds are a new type of tax exempt borrowing created under the Stimulus Act passed by Congress in February 2009. Up to $2 billion in the aggregate may be issued by tribes nationwide\n")
+
+cat("\n7. First Time Homebuyer Credit for Houses Purchased in  2009 - Number of Filers shows how many filers were there from each state\n")
+
+cat("\n8. First Time Homebuyer Credit for Houses Purchased in 2009 - Sum of Credits Claimed shows the total credits claimed in each state\n")
+
+cat("\n9. The Low-Income Housing Tax Credit provides a tax incentive to construct or rehabilitate affordable rental housing for low-income households.\n")
+
+cat("\n10. Cash Assistance for Specified Energy Property is the assitance given by the treasury in lieu of investment tax credits to eligible applicants for specified energy property used in a trade or business or for the production of income.\n")
+
+cat("\n11. New income tax credit provides an incentive for investment in low-income communities. The US Department of the Treasury competitively allocates tax credit authority to intermediaries that select investment projects.\n")
+
+cat("\n12. Build America Bonds were debt securities issued by a state, municipality, or county to finance capital expenditures.\n")
+
+```
+
+```{r Data Cleaning}
 toNumeric<-function(str){
   substring <- gsub("\\$","",str)
   substring <- gsub(",","",substring)
@@ -27,8 +58,7 @@ for(x in 2:23){
 print(train)
 ```
 
-
-```{r}
+```{r Further Preprocessing}
 row_sums <- c()
 
 print(train[1,])
@@ -48,12 +78,12 @@ head(train,5)
 
 ```
 
-
-```{r}
-ggplot(data = train[1:58,], aes(x = ï..States, y = Total.Allocation)) + geom_point()+ theme(axis.text.x = element_text(hjust = 1, vjust=0.5, angle = 90)) + ggtitle("State Allocation")
+```{r Visualisation - First Plot}
+ggplot(data = train[1:58,], aes(x = States, y = Total.Allocation)) + geom_point()+ theme(axis.text.x = element_text(hjust = 1, vjust=0.5, angle = 90)) + ggtitle("State Allocation")
 
 ```
-```{r}
+
+```{r Visualisation - Second Plot}
 
 x <- columns[valid_columns]
 y <- as.numeric(train[60,])
@@ -63,11 +93,85 @@ x
 length(y)
 y
 
-```
-
-
-```{r}
 barplot(y,names.arg=x,xlab="Month",ylab="Revenue",col="blue",
 main="Revenue chart",border="red")
+```
+
+```{r TODO: Hypothesis Testing}
+recovery_zone_data = as.numeric(train$Recovery.Zone.Economic.Development.Bond.Allocation)
+recovery_zone_data = recovery_zone_data[1:56]
+
+print(median(recovery_zone_data))
+
+recovery_zone_data
+
+```
+
+```{r Viewing Principal Components}
+library(factoextra)
+train_numeric = data.frame(sapply(train, as.numeric))[1:58,]
+
+train.pca = prcomp(train_numeric, scale = TRUE)
+summary(train.pca)
+
+cat("\n\n\nHence, We require only the first 6 Principal Components to represent ")
+cat(green("92.939%"))
+cat(" of the variance in the dataset.")
+
+cat("\nWe also notice that most of the variance (")
+cat(yellow("66.52"))
+cat(") is defined by the first column.")
+
+```
+
+```{r PCA Visualisation}
+#To visualise the data
+
+fviz_eig(train.pca, main = "Percentage of Variance")
+
+fviz_pca_var(train.pca, col.ind = "contrib", repel = TRUE,
+             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"))
+
+```
+
+```{r Correlation Testing}
+library(crayon)
+
+#First Test
+cat("Correlation between Homebuying Credit Number of Filers and Total Credits Issued: ")
+cat(green(cor(train_numeric$First.Time.Homebuyer.Credit.for.Houses.Purchased.in..2009...Number.of.Filers, train_numeric$First.Time.Homebuyer.Credit.for.Houses.Purchased.in.2009...Sum.of.Credits.Claimed)))
+cat("\nClearly, the number of Filers and the sum of credits claimed for housing are highly correlated.\n\n")
+
+#Second Test
+cat("Next, we'll check the correlation between the Awards and Outlays for Low Income Housing Credits, which is: ")
+cat(yellow(cor(train_numeric$Cash.Assistance.to.States.in.Lieu.of.Low.Income.Housing.Tax.Credit...Awards, train_numeric$Cash.Assistance.to.States.in.Lieu.of.Low.Income.Housing.Tax.Credit...Outlays)))
+cat("\nAgain, the correlation between the two is there, but not as high.\n\n")
+
+#Third Test
+cat("Now, the correlation between Recovery Zone Development Bond Allocation and Tribal Bond Allocation: ")
+cat(red(cor(train_numeric$Recovery.Zone.Economic.Development.Bond.Allocation, train_numeric$Tribal.Economic.Development.Bond.Allocation)))
+cat("\nHere we see that the correlation between these is very low, suggesting that Tribal Zones have little to no effect on Recovery Zones.\n\n")
+
+#Fourth Test
+cat("Now, the correlation between Recovery Zone Development Bond Allocation and Facility Bond Allocation: ")
+cat(green(cor(train_numeric$New.Markets.Tax.Credit....Number.of.Organizations, train_numeric$New.Markets.Tax.Credit...Awards)))
+cat("\nThe correlation between the two is high.\n\n")
+
+```
+
+```{r Regression not possible}
+
+cat("Regression is not not possible in this dataset simply because there is no 'future' to predict with the given data.\n\n")
+
+cat("As an example,\nWhile we have the data for funding allocated for Qualified School Construction for both 2009 and 2010 for all states, we do not have the data it is dependant on i.e. the number of qualified schools, the level of education in those states, number of students currently in education in those states, etc.\n")
+
+cat("\nSo while the two variables are highly correlated, having a correlation of ")
+cat(green(cor(train_numeric$X2009.Qualified.School.Construction.Bond.Allocation, train_numeric$X2010.Qualified.School.Construction.Bond.Allocation)))
+cat(". We would not be able to derive any meaningful conclusion from regression as we have all the data for the two years and we cannot derive any further predictions due to a lack of dependant variable or even partial future data.")
+
+```
+
+```{r TODO: Classification}
+
 ```
 
