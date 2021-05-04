@@ -10,11 +10,17 @@ train
 columns<-colnames(train)
 columns
 ```
-```{r}
-toNumeric<-function(str){
-  return (strtoi(gsub(",","",substr(str,2, nchar(str)))))}
 
-for(x in 2:22){
+```{r}
+# data cleaning
+
+toNumeric<-function(str){
+  substring <- gsub("\\$","",str)
+  substring <- gsub(",","",substring)
+  return (as.numeric(substring))
+}
+
+for(x in 2:23){
   train[x] <- lapply(train[x], toNumeric)
 }
 
@@ -23,48 +29,45 @@ print(train)
 
 
 ```{r}
-print(summarizeColumns(train))
+row_sums <- c()
+
+print(train[1,])
+
+valid_columns <- c(2, 3, 4, 5, 6, 7, 9, 10, 11, 13, 15, 17, 19, 21)
+
+for(x in 1:nrow(train)){
+  sum <- 0
+  for(y in valid_columns){
+    sum <- sum + as.numeric(train[x,][y])
+  }
+  row_sums <- append(row_sums, sum)
+}
+train["Total.Allocation"] = row_sums
+
+head(train,5)
 
 ```
 
-```{r}
-ggplot(data = train, aes(x = ï..States, y = Recovery.Zone.Economic.Development.Bond.Allocation)) + geom_point()+ theme(axis.text.x = element_text(hjust = 1, vjust=0.5, angle = 90))
-```
-```{r}
-ggplot(data = train, aes(x = ï..States, y = Recovery.Zone.Facility.Bond.Allocation)) + geom_point()+ theme(axis.text.x = element_text(hjust = 1, vjust=0.5, angle = 90))
-```
 
 ```{r}
-ggplot(data = train, aes(x = ï..States, y = X2009.Qualified.School.Construction.Bond.Allocation)) + geom_point()+ theme(axis.text.x = element_text(hjust = 1, vjust=0.5, angle = 90))
+ggplot(data = train[1:58,], aes(x = ï..States, y = Total.Allocation)) + geom_point()+ theme(axis.text.x = element_text(hjust = 1, vjust=0.5, angle = 90)) + ggtitle("State Allocation")
+
 ```
 ```{r}
-ggplot(data = train, aes(x = ï..States, y = X2010.Qualified.School.Construction.Bond.Allocation)) + geom_point()+ theme(axis.text.x = element_text(hjust = 1, vjust=0.5, angle = 90))
+
+x <- columns[valid_columns]
+y <- as.numeric(train[60,])
+y <- y[valid_columns]
+length(x)
+x
+length(y)
+y
+
 ```
+
+
 ```{r}
-ggplot(data = train, aes(x = ï..States, y = Qualified.Energy.Conservation.Bond.Allocation)) + geom_point()+ theme(axis.text.x = element_text(hjust = 1, vjust=0.5, angle = 90))
-```
-```{r}
-ggplot(data = train, aes(x = ï..States, y = X2009.Qualified.Zone.Academy.Bond.Allocation)) + geom_point()+ theme(axis.text.x = element_text(hjust = 1, vjust=0.5, angle = 90))
-```
-```{r}
-ggplot(data = train, aes(x = ï..States, y = X2010.Qualified.Zone.Academy.Bond.Allocation)) + geom_point()+ theme(axis.text.x = element_text(hjust = 1, vjust=0.5, angle = 90))
-```
-```{r}
-ggplot(data = train, aes(x = ï..States, y = Tribal.Economic.Development.Bond.Allocation)) + geom_point()+ theme(axis.text.x = element_text(hjust = 1, vjust=0.5, angle = 90))
-```
-```{r}
-ggplot(data = train, aes(x = ï..States, y = First.Time.Homebuyer.Credit.for.Houses.Purchased.in..2009...Number.of.Filers)) + geom_point()+ theme(axis.text.x = element_text(hjust = 1, vjust=0.5, angle = 90))
-```
-```{r}
-ggplot(data = train, aes(x = ï..States, y = First.Time.Homebuyer.Credit.for.Houses.Purchased.in.2009...Sum.of.Credits.Claimed)) + geom_point()+ theme(axis.text.x = element_text(hjust = 1, vjust=0.5, angle = 90))
-```
-```{r}
-ggplot(data = train, aes(x = ï..States, y = Cash.Assistance.to.States.in.Lieu.of.Low.Income.Housing.Tax.Credit...Awards)) + geom_point()+ theme(axis.text.x = element_text(hjust = 1, vjust=0.5, angle = 90))
-```
-```{r}
-ggplot(data = train, aes(x = ï..States, y = train$Cash.Assistance.to.States.in.Lieu.of.Low.Income.Housing.Tax.Credit...Outlays)) + geom_point()+ theme(axis.text.x = element_text(hjust = 1, vjust=0.5, angle = 90))
-```
-```{r}
-ggplot(data = train, aes(x = ï..States, y = train$Cash.Assistance.for.Specified.Energy.Property.in.Lieu.of.Tax.Credit....Number.of.Awards)) + geom_point()+ theme(axis.text.x = element_text(hjust = 1, vjust=0.5, angle = 90))
+barplot(y,names.arg=x,xlab="Month",ylab="Revenue",col="blue",
+main="Revenue chart",border="red")
 ```
 
