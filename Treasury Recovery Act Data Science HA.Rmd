@@ -8,7 +8,8 @@ train
 
 ```{r Data Inspection}
 columns<-colnames(train)
-columns
+cat(columns, "\n\n\n")
+summary(train)
 ```
 
 ```{r Column Metadata}
@@ -78,33 +79,43 @@ head(train,5)
 
 ```
 
-```{r Visualisation - First Plot}
+```{r TODO: Visualisations}
 ggplot(data = train[1:58,], aes(x = States, y = Total.Allocation)) + geom_point()+ theme(axis.text.x = element_text(hjust = 1, vjust=0.5, angle = 90)) + ggtitle("State Allocation")
-
-```
-
-```{r Visualisation - Second Plot}
 
 x <- columns[valid_columns]
 y <- as.numeric(train[60,])
 y <- y[valid_columns]
-length(x)
-x
-length(y)
-y
 
 barplot(y,names.arg=x,xlab="Month",ylab="Revenue",col="blue",
-main="Revenue chart",border="red")
+main="Revenue chart",border="black")
 ```
 
-```{r TODO: Hypothesis Testing}
-recovery_zone_data = as.numeric(train$Recovery.Zone.Economic.Development.Bond.Allocation)
-recovery_zone_data = recovery_zone_data[1:56]
+```{r Hypothesis Testing}
+construction_data_2009 = as.numeric(train$X2009.Qualified.School.Construction.Bond.Allocation)
+construction_data_2009 = construction_data_2009[1:56]
 
-print(median(recovery_zone_data))
+construction_data_2010 = as.numeric(train$X2010.Qualified.School.Construction.Bond.Allocation)
+construction_data_2010 = construction_data_2010[1:56]
 
-recovery_zone_data
+cat("We know that the mean for the Qualified School Construction bonds allocated in 2009 is", yellow(mean(construction_data_2009)))
 
+cat("\n\nOur hypothesis is that the funds allocated for School Construction in 2010 would be less than that of 2009, as this fund was allocated i response to the 2008 financial crash, and after a whole year of recovery the need for funding should be reduced\n")
+
+m = mean(construction_data_2010)
+s = sd(construction_data_2010)
+se = s/(sqrt(length(construction_data_2010)))
+pvalue=pnorm(m,mean(construction_data_2009),se)
+
+cat("\nAssuming a significance level of 5%, we can judge that")
+
+
+if(pvalue<0.05) {
+  cat(" our claim", green("cannot be rejected"), "\n")
+} else {
+  cat(" our claim can be", red("rejected"), "\n")
+}
+
+cat("\nHence, the mean for Funding allocated in 2010 is no less than that allocated in 2009")
 ```
 
 ```{r Viewing Principal Components}
@@ -159,19 +170,42 @@ cat("\nThe correlation between the two is high.\n\n")
 
 ```
 
-```{r Regression not possible}
+```{r Regression}
 
-cat("Regression is not not possible in this dataset simply because there is no 'future' to predict with the given data.\n\n")
+cat("For our regression example, we'll make a simple linear model to predict the total sum of First Time Homebuyer Credits given the number of Filers for it\n\n")
 
-cat("As an example,\nWhile we have the data for funding allocated for Qualified School Construction for both 2009 and 2010 for all states, we do not have the data it is dependant on i.e. the number of qualified schools, the level of education in those states, number of students currently in education in those states, etc.\n")
+# Split into test and train
 
-cat("\nSo while the two variables are highly correlated, having a correlation of ")
-cat(green(cor(train_numeric$X2009.Qualified.School.Construction.Bond.Allocation, train_numeric$X2010.Qualified.School.Construction.Bond.Allocation)))
-cat(". We would not be able to derive any meaningful conclusion from regression as we have all the data for the two years and we cannot derive any further predictions due to a lack of dependant variable or even partial future data.")
+filers = as.numeric(train_numeric$First.Time.Homebuyer.Credit.for.Houses.Purchased.in..2009...Number.of.Filers)
+filers = filers[filers != 0]
 
+credits = as.numeric(train_numeric$First.Time.Homebuyer.Credit.for.Houses.Purchased.in.2009...Sum.of.Credits.Claimed)
+credits = credits[credits != 0]
+
+filers.train = filers[1:40]
+filers.test = filers[41:50]
+
+credits.train = credits[1:40]
+credits.test = credits[41:50]
+
+#Training and Evaluation
+linear_model = lm(credits.train ~ filers.train)
+lm.train = data.frame("Filers" = filers.train, "Credits"=credits.train)
+print(ggplot(lm.train, aes(x=Filers,y=Credits))+geom_point() + geom_smooth(method = "lm", formula = y~x,col="red",se =F) + ggtitle("Filers Against Credits Issued"))
+
+cat("The adjusted R Squared Value for the model is", green(summary(linear_model)$r.squared), "which shows that the model has adapted very well to the training data\n")
+
+test = data.frame("filers.train" = filers.test)
+predictions = predict(linear_model, test)
+error = abs(credits.test - predictions)*100/credits.test
+
+results = data.frame("Filers" = filers.test, "Credits"=credits.test, "Prediction"=predictions, "Error %"=error)
+results
+
+cat("\nThe model aslo works well with the test data, giving a mean absolute error of", yellow(mean(error)))
 ```
 
-```{r TODO: Classification}
+```{r TODO:Classification}
 
 ```
 
