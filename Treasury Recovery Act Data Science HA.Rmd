@@ -86,7 +86,7 @@ x <- columns[valid_columns]
 y <- as.numeric(train[60,])
 y <- y[valid_columns]
 
-barplot(y,names.arg=x,xlab="Month",ylab="Revenue",col="blue",
+barplot(y,names.arg=x,xlab="Month",ylab="Revenue",las=2, col="blue",
 main="Revenue chart",border="black")
 ```
 
@@ -205,7 +205,14 @@ results
 cat("\nThe model aslo works well with the test data, giving a mean absolute error of", yellow(mean(error)))
 ```
 
-```{r TODO:Classification}
+```{r Classification}
+
+classification_data = data.frame("State" = train$States, "X2009 School Funds"=train$X2009.Qualified.School.Construction.Bond.Allocation, "X2010 School Funds" = train$X2010.Qualified.School.Construction.Bond.Allocation)
+classification_data = classification_data[1:56,]
+
+importance = (classification_data[,2] + classification_data[,3]) > mean(classification_data[,2] + classification_data[,3])
+classification_data = cbind(classification_data, "Above Mean" = importance)
+classification_data
 
 ```
 
